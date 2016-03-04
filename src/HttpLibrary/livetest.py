@@ -42,6 +42,7 @@ import sys
 import webtest
 import httplib
 import urlparse
+import ssl
 from Cookie import BaseCookie, CookieError
 from six.moves import http_cookiejar
 
@@ -101,7 +102,11 @@ class ResponseCookieAdapter(object):
 class TestApp(webtest.TestApp):
     def _load_conn(self, scheme):
         if scheme in conn_classes:
-            self.conn[scheme] = conn_classes[scheme](self.host)
+			if (scheme == 'https'):
+				h = ssl._create_unverified_context()
+				self.conn[scheme] = conn_classes[scheme](self.host,context=h)
+			else:
+				self.conn[scheme] = conn_classes[scheme](self.host)
         else:
             raise ValueError("Scheme '%s' is not supported." % scheme)
 
